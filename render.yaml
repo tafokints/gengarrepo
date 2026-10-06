@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: gengar-archive
+    runtime: node
+    plan: starter
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /healthz
+    disk:
+      name: collection-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 22
+      - key: DATA_DIR
+        value: /var/data/gengar
+      - key: APP_ORIGIN
+        sync: false
+      - key: OWNER_EMAIL
+        sync: false
+      - key: OWNER_PASSWORD_HASH
+        sync: false

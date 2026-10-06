@@ -1,0 +1,10 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {validateReviews} from '../server.mjs';
+const record=(overrides={})=>({status:'needs_review',front:'a',back:'b',fields:{name:'Gengar'},estimate:null,comps:[],...overrides});
+test('rejects the same photo as both front and back',()=>assert.throws(()=>validateReviews({'GNG-1234567890':record({back:'a'})},new Set(['a','b'])),/different/));
+test('rejects a photo assigned to multiple active records',()=>assert.throws(()=>validateReviews({'GNG-1234567890':record(),'GNG-1234567891':record()},new Set(['a','b'])),/more than one/));
+test('allows reassignment from an excluded record',()=>assert.doesNotThrow(()=>validateReviews({'GNG-1234567890':record(),'GNG-1234567891':record({status:'excluded'})},new Set(['a','b']))));
+test('requires both sides before readiness',()=>assert.throws(()=>validateReviews({'GNG-1234567890':record({status:'ready',back:''})},new Set(['a','b'])),/both photos/));
+test('rejects negative estimates',()=>assert.throws(()=>validateReviews({'GNG-1234567890':record({estimate:-1})},new Set(['a','b'])),/nonnegative/));
+test('requires usable sale evidence',()=>assert.throws(()=>validateReviews({'GNG-1234567890':record({comps:[{url:'javascript:alert(1)',date:'',price:2}]})},new Set(['a','b'])),/source URL/));
